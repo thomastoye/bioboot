@@ -1,14 +1,14 @@
 # bioboot
 
-## Accounts
+## GitHub accounts
 
 | Naam               | GitHub Username   | Email                      | Richting     |
-| ------------------ | ----------------- | -------------------------- |              |
+| ------------------ | ----------------- | -------------------------- | ------------ |
 | Tibert Dhont       | @tidhont          | tibert.dhont@ugent.be      | IO           |
 | Kevin Zhang        | @kezhang          | kevin.zhang@ugent.be       | IO           |
 | Nicolas Maes       | @ngemaes          | nicolas.maes@ugent.be      | ELA-ICT      |
 | Janis De Vogelaere | @jjdvogel         | janis.devogelaere@ugent.be | IO           |
-| Giani O            | @gollivie         | giani.ollivier@ugent.be    | ELA-ICT      |
+| Giani Ollivier     | @gollivie         | giani.ollivier@ugent.be    | ELA-ICT      |
 | Thomas Toye        | @trtoye           | thomas.toye@ugent.be       | ELA-ICT      |
 
 ## Rollen
