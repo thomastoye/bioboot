@@ -6,7 +6,7 @@
 
 | Rol               | Door               |
 | ----------------- | ------------------ |
-| Elektronica       | Giani              |
+| Elektronica       | Giani, Nicolas     |
 | Informatica       | Thomas             |
 | Embodiment        | Tibert             |
 | User interface    | Janis              |
