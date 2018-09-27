@@ -1,5 +1,16 @@
 # bioboot
 
+## GitHub accounts
+
+| Naam               | Username          | Richting
+| ------------------ | ----------------- | ------------ |
+| Tibert Dhont       | @tidhont          | IO           |
+| Kevin Zhang        | @kezhang          | IO           |
+| Nicolas Maes       | @ngemaes          | ELA-ICT      |
+| Janis De Vogelaere | @jjdvogel         | IO           |
+| Giani O            | @gollivie         | ELA-ICT      |
+| Thomas Toye        | @trtoye           | ELA-ICT      |
+
 ## Rollen
 
 ### Technische rollen
