@@ -6,19 +6,19 @@
 
 | Rol               | Door               |
 | ----------------- | ------------------ |
-| Elektronica       |
-| Informatica       |
-| Embodiment        |
-| User interface    |
-| User experience   |
+| Elektronica       | Giani              |
+| Informatica       | Thomas             |
+| Embodiment        | Tibert             |
+| User interface    | Janis              |
+| User experience   | Kevin              |
 
 ### Managementrollen
 
 | Rol                            | Door              |
 | ------------------------------ | ----------------- |
-| Project manager                |
-| Financial manager              |
-| Communication manager          |
-| Technical manager (embodiment) |
-| Technical manager (ICT)        |
+| Project manager                | Thomas            |
+| Financial manager              | Tibert            |
+| Communication manager          | Kevin             |
+| Technical manager (embodiment) | Janis             |
+| Technical manager (ICT)        | Giani             |
 
