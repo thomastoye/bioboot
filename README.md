@@ -1,6 +1,12 @@
 # bioboot
 
-## GitHub accounts
+## Links
+
+* Repository: https://github.ugent.be/trtoye/bioboot
+* GitHub Pages: https://github.ugent.be/pages/trtoye/bioboot/
+* Slack: https://bioboot.slack.com
+
+## Accounts
 
 | Naam               | GitHub Username   | Email                      | Richting     |
 | ------------------ | ----------------- | -------------------------- | ------------ |
