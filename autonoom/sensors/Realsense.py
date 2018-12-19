@@ -4,6 +4,7 @@ import numpy as np
 import cv2
 import collections
 import _thread
+import functions.basicfunctions
 
 
 @singleton
@@ -12,11 +13,12 @@ class RealSense:
     deq = None
 
     def __init__(self):
+
         pipeline = rs.pipeline()
         config = rs.config()
         config.enable_stream(rs.stream.depth, 1280, 720, rs.format.z16, 30)
         self.deq = collections.deque(maxlen=1)
-        _thread.start_new_thread(updatedata, (self.deq,pipeline,config))
+        _thread.start_new_thread(self.updatedata, (self.deq, pipeline, config))
 
     def updatedata(self,q,pipeline,config):
         try:
@@ -33,7 +35,9 @@ class RealSense:
                 # Convert images to numpy arrays
                 depth_image = np.asanyarray(depth_frame.get_data())
 
-                q.append(detectShoresFrom3DImage(depth_image))
+
+                q.append(functions.basicfunctions.detectShoresFrom3DImage((depth_image)))
+
 
         finally:
             # Stop streaming

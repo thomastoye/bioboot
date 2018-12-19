@@ -1,5 +1,9 @@
 import numpy as np
 from scipy import ndimage as ndi
+import urllib
+from urllib.request import urlopen
+import json
+from geographiclib.geodesic import Geodesic
 
 
 ################################
@@ -10,15 +14,15 @@ from scipy import ndimage as ndi
 ################################
 
 def detectShoresFrom3DImage(img):
-    img[img < 3] = 255            # filter out infinity
+    img[img < 400] = 65535           # filter out infinity
 
 
     #filter out water troug horizon based model can use improvement
     for i in range(450, 719):
-        k = 100 - (i - 450) * 1 / 2.7
-        r = img[i, :][img[i, :] < (100 - (i - 450) * 1 / 3)] = 255
+        k = 22000 - (i - 450) * 256 / 2.7
+        r = img[i, :][img[i, :] < (25000 - (i - 450) * 256 / 2.9)] = 65535
 
-    blur = ndi.gaussian_filter(img, sigma=15)        #filtering out noise
+    blur = ndi.gaussian_filter(img, sigma=20)        #filtering out noise
     blurc = blur[400:719, :]                        #removing air
 
     d2 = np.amin(blurc, axis=0)                     #converting to 1d array
@@ -38,7 +42,7 @@ def detectShoresFrom3DImage(img):
 def determinedirection(lidardata, realsensedata,generaldirection):
     lidardata[lidardata < 1500] = 5500        #everything under 1500 is on boat self
 
-    if rdata < 3000:            #almost colision imediate action needed
+    if lidardata < 3000:            #almost colision imediate action needed
         return generaldirection,0
 
     if generaldirection < -25 | generaldirection > 25:   # turn no navigation possible
@@ -76,7 +80,7 @@ def topwm(direction, speed):
         right = 255
 
     if right < -255:
-        left = left - rigt - 255
+        left = left - right - 255
         right = -255
 
     return "{\"left\":%d,\"right\":%d}"
@@ -86,5 +90,24 @@ def readPsController():
     dir = 0
     speed = 0
     return dir, speed
+
+def getcurrentgps():
+    data = urllib.request.urlopen('http://172.217.17.67:80').read().decode('utf-8')
+    jo = json.load(data)
+    return jo
+
+
+def calcdirection(lat1,lon1,lat2,lon2):
+    geod = Geodesic.WGS84
+    g = geod.Inverse(lat1,lon1,lat2,lon2)
+    dir = g['azi1']
+    if dir <0:
+        dir = dir + 360
+    return dir
+
+def calcdistance(lat1,lon1,lat2,lon2):
+    geod = Geodesic.WGS84
+    g = geod.Inverse(lat1, lon1, lat2, lon2)
+    return g['s12']
 
 
