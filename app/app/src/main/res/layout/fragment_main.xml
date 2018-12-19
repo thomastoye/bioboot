@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/backbone_url"
-            android:text="http://192.168.1.31:3000"
+            android:text="http://192.168.7.116:3000"
             app:layout_constraintTop_toBottomOf="@+id/status_text"
     />
 

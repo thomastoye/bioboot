@@ -4,6 +4,9 @@ import cv2
 import collections
 import _thread
 import serial
+from time import sleep
+import json
+import math
 
 
 @singleton
@@ -14,7 +17,6 @@ class Arduino:
 
 
     def __init__(self):
-        ser = serial.Serial('COM32', 9600, timeout=0.1)
         self.queget = collections.deque(maxlen=1)
         self.quesend = collections.deque(maxlen=1)
         _thread.start_new_thread(self.updatedata, (self.queget,self.quesend, serial.Serial('COM32', 9600,timeout=0.1)))
@@ -25,13 +27,13 @@ class Arduino:
 
             while True:
 
-                k =  ser.readline()
-                if k != None:
+                k = ser.readline()
+                if k != b'':
                     qget.append(k)
 
-                if not qsend.empty():
+                if qsend:
                     ser.write(qsend.popleft())
-
+                sleep(0.1)
 
         finally:
             # Stop streaming
@@ -42,14 +44,20 @@ class Arduino:
         try:
             v = self.queget.popleft()
             self.queget.append(v)
-            return v
-        except:
-            print("realsensque empty")
+            d = json.loads(str(v,'ascii'))
+            dir = math.atan2(d['my'],d['mx'])
+            dir = dir*180/math.pi
+            if dir < 0:
+                dir = dir + 360
+            return dir
+        except Exception as e:
+            print("arduino not ready")
+            print(str(e))
             return None
 
     def sendmotorValue(self,value):
         try:
             return self.quesend.append(value)
         except:
-            print("realsensque empty")
+            print("arduino crashed")
             return None
