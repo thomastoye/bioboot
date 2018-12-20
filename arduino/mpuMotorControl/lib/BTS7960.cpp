@@ -12,8 +12,8 @@ BTS7960::BTS7960(int LPWM,int RPWM,int L_EN,int R_EN,int PRESCALER)
   pinMode(_L_EN, OUTPUT);
   pinMode(_R_EN, OUTPUT);
 
-  //setPwmFrequencyMEGA2560(_LPWM, PRESCALER);
-  //setPwmFrequencyMEGA2560(_RPWM, PRESCALER);
+  setPwmFrequencyMEGA2560(_LPWM, PRESCALER);
+  setPwmFrequencyMEGA2560(_RPWM, PRESCALER);
 }
 
 void BTS7960::enable()
@@ -36,12 +36,12 @@ void BTS7960::stop()
 
 void BTS7960::setSpeed(int pwm)
 {
-	Serial.println("inside speed");
-	Serial.println(pwm);
+	//Serial.println("inside speed");
+	//Serial.println(pwm);
   if ((pwm < (-255)) || (pwm > 255))
   {
-	  Serial.println("inside first if");
-	  Serial.println(pwm);
+	  //Serial.println("inside first if");
+	  //Serial.println(pwm);
     // out of range stop the motor
     stop();
   }
@@ -49,15 +49,15 @@ void BTS7960::setSpeed(int pwm)
   {
     if (pwm > 0 )
 	{
-		Serial.println("inside second if");
-		Serial.println(pwm);
+		//Serial.println("inside second if");
+		//Serial.println(pwm);
 		analogWrite(_LPWM,0);
 		analogWrite(_RPWM,pwm);
     }
 	else
 	{
-		Serial.println("inside last else");
-		Serial.println(pwm);
+		//Serial.println("inside last else");
+		//Serial.println(pwm);
 		analogWrite(_RPWM,0);
 		analogWrite(_LPWM,-pwm);
     }

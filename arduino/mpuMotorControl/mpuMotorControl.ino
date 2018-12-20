@@ -60,7 +60,7 @@ void setup()
 {
   // Arduino initializations
   Wire.begin();
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   // Set accelerometers low pass filter at 5Hz
   I2CwriteByte(MPU9250_ADDRESS, 29, 0x06);
