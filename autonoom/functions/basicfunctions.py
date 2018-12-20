@@ -63,28 +63,57 @@ def determinedirection(lidardata, realsensedata,generaldirection):
 #returns json format for motor driver
 
 
-def topwm(direction, speed):
-    dif  = direction *2.8
-    left = speed + dif
-    right = speed - dif
-    if left > 255:
-        right = right - left + 255
-        left = 255
+def topwm(direction, speed,controller=False):
+    if controller==False:
+        dif = direction * 2.8
+        left = speed + dif
+        right = speed - dif
+        if left > 255:
+            right = right - left + 255
+            left = 255
 
-    if left < -255:
-        right = right - left - 255
-        left = -255
+        if left < -255:
+            right = right - left - 255
+            left = -255
 
-    if right > 255:
-        left = left - right + 255
-        right = 255
+        if right > 255:
+            left = left - right + 255
+            right = 255
 
-    if right < -255:
-        left = left - right - 255
-        right = -255
+        if right < -255:
+            left = left - right - 255
+            right = -255
 
-    return "{\"left\":%d,\"right\":%d}"
 
+    else:
+        if speed < -255:
+            speed = -255
+        elif speed > 255:
+            speed = 255
+
+        if direction < 0:
+            if direction > -0.8:
+                left = np.abs((speed*2*direction)/0.8)-speed
+                right = speed
+            else:
+                if speed < 0:
+                    left = -255
+                    right = 255
+                else:
+                    left = 255
+                    right = 255
+        elif direction > 0:
+            if direction < 0.8:
+                left = np.abs((speed*2*direction)/0.8)-speed
+                right = speed
+            else:
+                if speed < 0:
+                    left = -255
+                    right = 255
+                else:
+                    left = 255
+                    right = 255
+    return "{\"left\":\"%i\"," %left +"\"right\":\"%i\"}" %right
 
 def readPsController():
     dir = 0
