@@ -178,6 +178,15 @@ void serialEvent()
         char val[index4-index3];
         (motorSetting.substring(index3+1,index4)).toCharArray(val, sizeof(val));
         int v = atoi(val);
+
+        if (v > 255)
+        {
+          v = 255;
+        }
+        else if (v < -255)
+        {
+          v = -255;
+        }
         //Serial.println(v);
         //assign depending on direction
         switch(d.charAt(0)) 
