@@ -22,13 +22,13 @@ import subprocess
 
 import ps3
 
-automatic = 0
+automatic = 1
 
 waypoints = [[51.032981, 3.734168], [51.031186, 3.735625], [51.030953, 3.737267], [51.031307, 3.739161]]
 waypointp = 0
 
 sleep(1)
- arduino = sensors.Arduino.Arduino()
+arduino = sensors.Arduino.Arduino()
 
 # initialization of controller working
 controller = ps3.boatcontroller(0)

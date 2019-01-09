@@ -14,13 +14,18 @@ class Arduino:
 
     queget = None
     quesend = None
+    quephone = None
 
 
     def __init__(self):
         self.queget = collections.deque(maxlen=1)
         self.quesend = collections.deque(maxlen=1)
-        _thread.start_new_thread(self.updatedata, (self.queget,self.quesend, serial.Serial('COM32', 9600,timeout=0.1)))
+        self.quephone = collections.deque(maxlen=1)
+        _thread.start_new_thread(self.updatedata, (self.queget,self.quesend, serial.Serial('COM32', 9600,timeout=5)))
 
+
+    def getquephone(self):
+        return self.quephone
 
     def updatedata(self,qget,qsend,ser):
         try:
@@ -32,7 +37,11 @@ class Arduino:
                     qget.append(k)
 
                 if qsend:
-                    ser.write(qsend.popleft())
+                    mm = qsend.popleft()
+                    print(mm)
+                    print("dgtfh")
+                    self.quephone.append(mm)
+                    ser.write(str.encode(mm))
                 sleep(0.1)
 
         finally:
