@@ -91,28 +91,30 @@ def topwm(direction, speed,controller=False):
         elif speed > 255:
             speed = 255
 
-        if direction < 0:
-            if direction > -0.8:
-                left = np.abs((speed*2*direction)/0.8)-speed
-                right = speed
+        direction_abs = abs(direction)
+
+        if direction_abs == 1:
+            if direction > 0 :
+                left = 255
+                right = -255
             else:
-                if speed < 0:
-                    left = -255
-                    right = 255
-                else:
-                    left = 255
-                    right = 255
-        elif direction > 0:
-            if direction < 0.8:
-                left = np.abs((speed*2*direction)/0.8)-speed
-                right = speed
+                left = -255
+                right = 255
+        else:
+            #calculate speed for motor that has to be lowered in speed to turn in specified direction
+            speed_abs=abs(speed)
+            m_lower_speed = -((speed_abs*2)*direction_abs-speed_abs)
+
+            if direction > 0 :
+                left = speed_abs
+                right = m_lower_speed
             else:
-                if speed < 0:
-                    left = -255
-                    right = 255
-                else:
-                    left = 255
-                    right = 255
+                left = m_lower_speed
+                right = speed_abs
+
+        if speed < 0 :
+           left = -left
+           right = -right
     return "{\"left\":\"%i\"," %left +"\"right\":\"%i\"}" %right
 
 def readPsController():

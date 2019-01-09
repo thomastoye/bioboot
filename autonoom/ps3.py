@@ -175,13 +175,27 @@ class boatcontroller:
     #     self.motorSpeed = speed
 
     def getMotorspeed(self):
-        return self.motorSpeed
+        if self.motorSpeed > 255:
+            return 255
+        elif self.motorSpeed < -255:
+            return -255
+        else:
+            return self.motorSpeed
     def getDirection(self):
-        return self.direction
+        if self.direction > 1:
+            return 1
+        elif self.direction < -1:
+            return -1
+        else:
+            return self.direction
 
     def getAxis(self,number):
-        if self.joystick.get_axis(number) < -0.1 or self.joystick.get_axis(number) > 0.1:
+        if self.joystick.get_axis(number) < -0.05 or self.joystick.get_axis(number) > 0.05:
             return number,(self.joystick.get_axis(number))
+        else:
+            #return number, 0
+            self.direction = 0
+
         return None,None
 
     # def getAxes(self):
@@ -212,8 +226,16 @@ class boatcontroller:
             if self.axes != 0:
                 temp_ax, temp_ax_value = self.getAxis(0)
                 if temp_ax == 0:
-                    print('tempax')
-                    self.direction = temp_ax_value
+                    #print('tempax')
+                    direction_abs = abs(temp_ax_value)
+                    mapped_dir = (0.636997 * (direction_abs ** 3)) - (1.74796 * (direction_abs ** 2)) + (
+                    2.11798 * direction_abs) + 0.00619418
+
+                    if temp_ax_value > 0:
+                        self.direction = mapped_dir
+                    else:
+                        self.direction = -mapped_dir
+                    #print(self.getDirection())
                     # arduino.sendmotorValue(functions.basicfunctions.topwm(temp_ax_value, motorSpeed,True))
                     # print(functions.basicfunctions.topwm(temp_ax_value, motorSpeed,True))
             if self.buttons != 0:
@@ -234,11 +256,11 @@ class boatcontroller:
             if self.hats != 0:
                 for i in range(self.hats):
                     self.getHat(i)
-            print(self.motorSpeed)
+            #print(self.getMotorspeed())
 
 
-controller=boatcontroller(0)
+#controller=boatcontroller(0)
 
-while 1:
-    controller.pollBoatDirection(150)
-    time.sleep(0.15)
+#while 1:
+ #   controller.pollBoatDirection(150)
+  #  time.sleep(0.15)
