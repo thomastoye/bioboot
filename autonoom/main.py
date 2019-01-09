@@ -99,19 +99,4 @@ while (1):
             else:
                 print("Speed changed while turning")
 
-
-        # if controller_prev_dir != controller.getDirection():
-        #
-        #     controller_prev_dir = controller.getDirection()
-        #     controller_prev_motorspeed = controller.getMotorspeed()
-        #
-        #     print(controller_prev_dir)
-        #     print(controller_prev_motorspeed)
-        #
-        # elif controller_prev_motorspeed != controller.getMotorspeed():
-        #
-        #     controller_prev_motorspeed = controller.getMotorspeed()
-        #     print(controller_prev_dir)
-        #     print(controller_prev_motorspeed)
-
         sleep(0.15)
