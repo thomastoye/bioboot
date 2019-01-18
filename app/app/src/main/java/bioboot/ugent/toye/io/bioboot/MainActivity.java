@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.TextView;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -32,6 +33,9 @@ public class MainActivity extends AppCompatActivity {
     private RequestQueue queue;
     private Context mainActivity;
 
+    private TextView statusMotorLeft;
+    private TextView statusMotorRight;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +45,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        statusMotorLeft = (TextView) findViewById(R.id.status_motor_left);
+        statusMotorRight = (TextView) findViewById(R.id.status_motor_right);
+
+        statusMotorLeft.setText(R.string.default_status_motor_left);
+        statusMotorRight.setText(R.string.default_status_motor_right);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -126,7 +136,29 @@ public class MainActivity extends AppCompatActivity {
         return url.getText().toString();
     }
 
+    private void getInformation(String url) {
+        Log.d(TAG, "Getting current status from backbone...");
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.POST, url + "/pull", null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, "Successfully received data from backbone");
+                        //mTextView.setText("Response: " + response.toString());
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // TODO: Handle error
+                        Log.e(TAG, "Error while sending data to backbone", error);
+                    }
+                });
+    }
+
     private void sendInformation(String url, Location location) {
+
         JSONObject jsonObject = new JSONObject();
 
         try {
