@@ -7,6 +7,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -36,6 +37,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView statusMotorLeft;
     private TextView statusMotorRight;
 
+    Handler backbonePullDataHandler = new Handler();
+    int backbonePullDataInterval = 500;
+    Runnable backbonePullDataRunnable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,8 +61,10 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Deze knop doet niets ATM", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                getInformation(getUrl());
+
+//                Snackbar.make(view, "Deze knop doet niets ATM", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
             }
         });
 
@@ -110,6 +117,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        backbonePullDataHandler.postDelayed( backbonePullDataRunnable = new Runnable() {
+            public void run() {
+                getInformation(getUrl());
+
+                backbonePullDataHandler.postDelayed(backbonePullDataRunnable, backbonePullDataInterval);
+            }
+        }, backbonePullDataInterval);
+
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        backbonePullDataHandler.removeCallbacks(backbonePullDataRunnable);
+
+        super.onPause();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -140,21 +167,34 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "Getting current status from backbone...");
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.POST, url + "/pull", null, new Response.Listener<JSONObject>() {
+                (Request.Method.GET, url + "/pull", null, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, "Successfully received data from backbone");
-                        //mTextView.setText("Response: " + response.toString());
+                        try {
+                            String left = response.getString("left");
+                            String right = response.getString("right");
+                            Log.d(TAG, "Received from backbone: right="+right+", left="+left);
+
+                            statusMotorLeft.setText(left);
+                            statusMotorRight.setText(right);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }, new Response.ErrorListener() {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        // TODO: Handle error
-                        Log.e(TAG, "Error while sending data to backbone", error);
+                        Snackbar.make(findViewById(R.id.main_activity), "Kon data niet ophalen", Snackbar.LENGTH_SHORT).show();
+                        Log.e(TAG, "Could not pull data from backbone", error);
                     }
                 });
+
+        jsonObjectRequest.setShouldCache(false);
+
+        queue.add(jsonObjectRequest);
     }
 
     private void sendInformation(String url, Location location) {
