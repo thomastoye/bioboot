@@ -30,13 +30,14 @@ class RealSense:
                 depth_frame = frames.get_depth_frame()
 
                 if not depth_frame :
+                    print('nodf')
                     continue
 
                 # Convert images to numpy arrays
                 depth_image = np.asanyarray(depth_frame.get_data())
 
 
-                q.append(functions.basicfunctions.detectShoresFrom3DImage((depth_image)))
+                self.deq.append(functions.basicfunctions.detectShoresFrom3DImage((depth_image)))
 
 
         finally:
@@ -46,7 +47,9 @@ class RealSense:
 
     def getRealSenseValue(self):
         try:
-            return self.deq.popleft()
+            v = self.deq.popleft()
+            self.deq.append(v)
+            return v
         except:
             print("realsensque empty")
             return None

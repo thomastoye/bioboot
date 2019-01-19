@@ -22,8 +22,8 @@ import subprocess
 
 import ps3
 
-automatic = 1
-
+automatic = 0
+phone = sensors.Phone.Phone()
 waypoints = [[51.032981, 3.734168], [51.031186, 3.735625], [51.030953, 3.737267], [51.031307, 3.739161]]
 waypointp = 0
 
@@ -52,20 +52,29 @@ while (1):
             arduino = sensors.Arduino.Arduino()
             adir = arduino.getcompasValue()
             dir = wdir - adir
+            dir = 0
             print(dir)
             rs = sensors.Realsense.RealSense()
             rsv = rs.getRealSenseValue()
-            ldv = sensors.Lidar.Lidar().getLidarValue()
+
+            #ldv = sensors.Lidar.Lidar().getLidarValue()
+
             ldv = np.full(682, 5000)
             dir, speed = functions.basicfunctions.determinedirection(ldv, rsv, dir)
-            arduino.sendmotorValue(functions.basicfunctions.topwm(dir, speed))
-            print("nothing")
-        except:
+            int(dir)
+
+            if dir > 360:
+                dir = dir - 360
+            print(dir)
+            arduino.sendmotorValue(functions.basicfunctions.topwm(dir, speed,True))
+
+        except Exception as e:
             print("automation not possible")
+            print(str(e))
         sleep(0.1)
     #
     else:
-        controller.pollBoatDirection(150)
+        controller.pollBoatDirection(500)
         controller_dir = controller.getDirection()
         controller_m_speed = controller.getMotorspeed()
 
@@ -74,16 +83,17 @@ while (1):
 
             print("Turning")
             pwm_val = functions.basicfunctions.topwm(controller_dir,controller_prev_m_speed,True)
-            print(pwm_val)
+            #print(pwm_val)
             #print(controller_dir)
             #print(controller_m_speed)
+            arduino.sendmotorValue(pwm_val)
 
 
         elif controller_turning:
             controller_turning = False
             print("Stopped turning")
             pwm_val = functions.basicfunctions.topwm(0, controller_prev_m_speed)
-            print(pwm_val)
+            #print(pwm_val)
             #print(controller_m_speed)
             arduino.sendmotorValue(pwm_val)
 
@@ -93,7 +103,7 @@ while (1):
             if (controller_turning == False):
                 print("Speed changed")
                 pwm_val = functions.basicfunctions.topwm(0, controller_prev_m_speed)
-                print(pwm_val)
+                #print(pwm_val)
                 #print(controller_prev_m_speed)
                 arduino.sendmotorValue(pwm_val)
             else:
