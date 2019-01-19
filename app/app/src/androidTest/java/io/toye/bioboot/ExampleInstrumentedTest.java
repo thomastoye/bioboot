@@ -1,4 +1,4 @@
-package bioboot.ugent.toye.io.bioboot;
+package io.toye.bioboot;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("bioboot.ugent.toye.io.bioboot", appContext.getPackageName());
+        assertEquals("io.toye.bioboot", appContext.getPackageName());
     }
 }

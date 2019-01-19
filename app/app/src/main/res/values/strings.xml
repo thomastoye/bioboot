@@ -1,9 +1,6 @@
 <resources>
-    <string name="app_name">bioboot</string>
-    <string name="action_settings">Settings</string>
-    <string name="toast_unable_to_connect">Kon niet verbinden</string>
-    <string name="toast_connection_lost">Verbinding kwijt</string>
-    <string name="toast_connected_to">Verbonden met</string>
-    <string name="default_status_motor_left">(status motor links)</string>
-    <string name="default_status_motor_right">(status motor rechts)</string>
+    <string name="app_name">Bioboot</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
 </resources>

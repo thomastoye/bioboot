@@ -1,4 +1,4 @@
-package bioboot.ugent.toye.io.bioboot;
+package io.toye.bioboot;
 
 import org.junit.Test;
 

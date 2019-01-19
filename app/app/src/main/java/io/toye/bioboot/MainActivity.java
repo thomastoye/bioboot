@@ -1,4 +1,4 @@
-package bioboot.ugent.toye.io.bioboot;
+package io.toye.bioboot;
 
 import android.Manifest;
 import android.content.Context;
@@ -8,29 +8,34 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
-import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "MyActivity";
+
+    private TextView mTextMessage;
+
+    private static final String TAG = "MainActivity";
 
     private RequestQueue queue;
     private Context mainActivity;
@@ -45,35 +50,65 @@ public class MainActivity extends AppCompatActivity {
     int backbonePullDataInterval = 500;
     Runnable backbonePullDataRunnable;
 
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.navigation_home:
+                    mTextMessage.setText(R.string.title_home);
+                    return true;
+                case R.id.navigation_dashboard:
+                    mTextMessage.setText(R.string.title_dashboard);
+                    return true;
+                case R.id.navigation_notifications:
+                    mTextMessage.setText(R.string.title_notifications);
+                    return true;
+            }
+            return false;
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        backbonePullDataHandler.postDelayed( backbonePullDataRunnable = new Runnable() {
+            public void run() {
+                getInformation(getUrl());
+
+                backbonePullDataHandler.postDelayed(backbonePullDataRunnable, backbonePullDataInterval);
+            }
+        }, backbonePullDataInterval);
+
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        backbonePullDataHandler.removeCallbacks(backbonePullDataRunnable);
+
+        super.onPause();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        mTextMessage = (TextView) findViewById(R.id.message);
+        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
         mainActivity = this;
         queue = Volley.newRequestQueue(this);
 
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         statusMotorLeft = (TextView) findViewById(R.id.status_motor_left);
         statusMotorRight = (TextView) findViewById(R.id.status_motor_right);
 
         barMotorLeft = (ProgressBar) findViewById(R.id.bar_motor_left);
         barMotorRight = (ProgressBar) findViewById(R.id.bar_motor_right);
-
-        statusMotorLeft.setText(R.string.default_status_motor_left);
-        statusMotorRight.setText(R.string.default_status_motor_right);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getInformation(getUrl());
-
-//                Snackbar.make(view, "Deze knop doet niets ATM", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-            }
-        });
 
         Log.i(TAG, "Main activity start");
 
@@ -120,49 +155,6 @@ public class MainActivity extends AppCompatActivity {
         // Attach listener to GPS and network providers
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-
-    }
-
-    @Override
-    protected void onResume() {
-        backbonePullDataHandler.postDelayed( backbonePullDataRunnable = new Runnable() {
-            public void run() {
-                getInformation(getUrl());
-
-                backbonePullDataHandler.postDelayed(backbonePullDataRunnable, backbonePullDataInterval);
-            }
-        }, backbonePullDataInterval);
-
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        backbonePullDataHandler.removeCallbacks(backbonePullDataRunnable);
-
-        super.onPause();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private String getUrl() {
@@ -196,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Snackbar.make(findViewById(R.id.main_activity), "Kon data niet ophalen", Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(findViewById(R.id.container), "Kon data niet ophalen", Snackbar.LENGTH_SHORT).show();
                         Log.e(TAG, "Could not pull data from backbone", error);
                     }
                 });
@@ -263,4 +255,5 @@ public class MainActivity extends AppCompatActivity {
             return new JSONObject();
         }
     }
+
 }
