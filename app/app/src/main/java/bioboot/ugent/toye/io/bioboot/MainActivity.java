@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -37,6 +38,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView statusMotorLeft;
     private TextView statusMotorRight;
 
+    private ProgressBar barMotorLeft;
+    private ProgressBar barMotorRight;
+
     Handler backbonePullDataHandler = new Handler();
     int backbonePullDataInterval = 500;
     Runnable backbonePullDataRunnable;
@@ -53,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
 
         statusMotorLeft = (TextView) findViewById(R.id.status_motor_left);
         statusMotorRight = (TextView) findViewById(R.id.status_motor_right);
+
+        barMotorLeft = (ProgressBar) findViewById(R.id.bar_motor_left);
+        barMotorRight = (ProgressBar) findViewById(R.id.bar_motor_right);
 
         statusMotorLeft.setText(R.string.default_status_motor_left);
         statusMotorRight.setText(R.string.default_status_motor_right);
@@ -173,12 +180,14 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, "Successfully received data from backbone");
                         try {
-                            String left = response.getString("left");
-                            String right = response.getString("right");
+                            int left = Integer.parseInt(response.getString("left"));
+                            int right = Integer.parseInt(response.getString("right"));
                             Log.d(TAG, "Received from backbone: right="+right+", left="+left);
 
-                            statusMotorLeft.setText(left);
-                            statusMotorRight.setText(right);
+                            statusMotorLeft.setText("" + left);
+                            statusMotorRight.setText("" + right);
+                            barMotorLeft.setProgress(left);
+                            barMotorRight.setProgress(right);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -216,7 +225,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, "Successfully sent data to backbone");
-                        //mTextView.setText("Response: " + response.toString());
                     }
                 }, new Response.ErrorListener() {
 

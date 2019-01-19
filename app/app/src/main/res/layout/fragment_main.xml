@@ -37,4 +37,24 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@+id/status_motor_left"/>
 
+    <ProgressBar
+            android:id="@+id/bar_motor_left"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:min="0"
+            android:max="255"
+            android:indeterminate="false"
+            app:layout_constraintTop_toBottomOf="@+id/status_motor_right"/>
+
+    <ProgressBar
+            android:id="@+id/bar_motor_right"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:min="0"
+            android:max="255"
+            android:indeterminate="false"
+            app:layout_constraintTop_toBottomOf="@+id/bar_motor_left"/>
+
 </android.support.constraint.ConstraintLayout>
