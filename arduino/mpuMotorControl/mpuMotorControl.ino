@@ -192,13 +192,15 @@ void serialEvent()
         switch(d.charAt(0)) 
         {
           case 'l':
-            //Serial.print("left received value: ");
-            //Serial.println(val);
+            Serial.print("{\"left\":");
+            Serial.print(val);
+            Serial.println("}");
             mL.setSpeed(v);
             break;
           case 'r':
-            //Serial.print("right received value: ");
-            //Serial.println(val);
+            Serial.print("{\"right\":");
+            Serial.print(val);
+            Serial.println("}");
             mR.setSpeed(v);
             break;
           default:
