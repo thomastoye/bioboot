@@ -10,6 +10,15 @@ From here on, topics are assumed to be prefixed with `boat/:id` (e.g. `/status/m
 
 ### Sensors
 
+#### `/sensors/location`
+
+GPS data is published here. Example message:
+
+```
+{"location":{"lat":50.8612345,"lon":3.3512345,"accuracy":22.5,"bearing":0,"altitude":0,"speed":0,"provider":"network"}}
+
+```
+
 #### `/sensors/controller`
 
 

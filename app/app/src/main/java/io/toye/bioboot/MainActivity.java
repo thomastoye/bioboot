@@ -28,17 +28,20 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
-
     private TextView mTextMessage;
 
     private static final String TAG = "MainActivity";
-
-    private RequestQueue queue;
-    private Context mainActivity;
 
     private TextView statusMotorLeft;
     private TextView statusMotorRight;
@@ -46,9 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar barMotorLeft;
     private ProgressBar barMotorRight;
 
-    Handler backbonePullDataHandler = new Handler();
-    int backbonePullDataInterval = 500;
-    Runnable backbonePullDataRunnable;
+    Mqtt mqtt;
+
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -72,21 +74,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        backbonePullDataHandler.postDelayed( backbonePullDataRunnable = new Runnable() {
-            public void run() {
-                getInformation(getUrl());
-
-                backbonePullDataHandler.postDelayed(backbonePullDataRunnable, backbonePullDataInterval);
-            }
-        }, backbonePullDataInterval);
-
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        backbonePullDataHandler.removeCallbacks(backbonePullDataRunnable);
-
         super.onPause();
     }
 
@@ -95,20 +87,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTextMessage = (TextView) findViewById(R.id.message);
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        mTextMessage = findViewById(R.id.message);
+        BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        mainActivity = this;
-        queue = Volley.newRequestQueue(this);
+        statusMotorLeft = findViewById(R.id.status_motor_left);
+        statusMotorRight = findViewById(R.id.status_motor_right);
 
-        setContentView(R.layout.activity_main);
-
-        statusMotorLeft = (TextView) findViewById(R.id.status_motor_left);
-        statusMotorRight = (TextView) findViewById(R.id.status_motor_right);
-
-        barMotorLeft = (ProgressBar) findViewById(R.id.bar_motor_left);
-        barMotorRight = (ProgressBar) findViewById(R.id.bar_motor_right);
+        barMotorLeft = findViewById(R.id.bar_motor_left);
+        barMotorRight = findViewById(R.id.bar_motor_right);
 
         Log.i(TAG, "Main activity start");
 
@@ -124,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Acquire a reference to the system Location Manager
-        LocationManager locationManager = (LocationManager) mainActivity.getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
         // Define a listener that responds to location updates
         LocationListener locationListener = new LocationListener() {
@@ -134,7 +121,11 @@ public class MainActivity extends AppCompatActivity {
                 if (location == null) {
                     Log.i(TAG, "Location was null, not sending over");
                 } else {
-                    sendInformation(getUrl(), location);
+                    if (mqtt != null) {
+                        mqtt.sendLocation(location);
+                    } else {
+                        Log.d(TAG, "Could not send location: mqtt is null");
+                    }
                 }
 
             }
@@ -155,105 +146,32 @@ public class MainActivity extends AppCompatActivity {
         // Attach listener to GPS and network providers
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+
+        connectMqtt();
     }
 
-    private String getUrl() {
-        EditText url = (EditText) findViewById(R.id.backbone_url);
-        return url.getText().toString();
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 
-    private void getInformation(String url) {
-        Log.d(TAG, "Getting current status from backbone...");
+    private void connectMqtt() {
+        mqtt = new Mqtt(getApplicationContext());
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url + "/pull", null, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d(TAG, "Successfully received data from backbone");
-                        try {
-                            int left = Integer.parseInt(response.getString("left"));
-                            int right = Integer.parseInt(response.getString("right"));
-                            Log.d(TAG, "Received from backbone: right="+right+", left="+left);
-
-                            statusMotorLeft.setText("" + left);
-                            statusMotorRight.setText("" + right);
-                            barMotorLeft.setProgress(left);
-                            barMotorRight.setProgress(right);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Snackbar.make(findViewById(R.id.container), "Kon data niet ophalen", Snackbar.LENGTH_SHORT).show();
-                        Log.e(TAG, "Could not pull data from backbone", error);
-                    }
-                });
-
-        jsonObjectRequest.setShouldCache(false);
-
-        queue.add(jsonObjectRequest);
-    }
-
-    private void sendInformation(String url, Location location) {
-
-        JSONObject jsonObject = new JSONObject();
-
-        try {
-            jsonObject.put("location", packLocationToJSON(location));
-        } catch (JSONException e) {
-            Log.e(TAG, "Problem while creating request JSON", e);
-        }
-
-        Log.d(TAG, "Sending over data to backbone: " + jsonObject.toString());
-        Log.d(TAG, "URL to send to (should not end in '/'): " + url);
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.POST, url + "/push", jsonObject, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d(TAG, "Successfully sent data to backbone");
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // TODO: Handle error
-                        Log.e(TAG, "Error while sending data to backbone", error);
-                    }
-                });
-
-
-        // Add the request to the RequestQueue.
-        queue.add(jsonObjectRequest);
-    }
-
-    private static JSONObject packLocationToJSON(Location location) {
-        JSONObject jsonObject = new JSONObject();
-
-        try {
-            if (location == null) {
-                return null;
+        mqtt.onMotorUpdate(new Mqtt.OnMotorUpdateCallback() {
+            @Override
+            public void onLeftMotorUpdate(int value) {
+                Log.i(TAG, "Received new motor left value: " + value);
+                statusMotorLeft.setText("" + value);
+                barMotorLeft.setProgress(value);
             }
 
-            jsonObject.put("lat", location.getLatitude());
-            jsonObject.put("lon", location.getLongitude());
-            jsonObject.put("accuracy", location.getAccuracy());
-            jsonObject.put("bearing", location.getBearing());
-            jsonObject.put("altitude", location.getAltitude());
-            jsonObject.put("speed", location.getSpeed());
-            jsonObject.put("provider", location.getProvider());
-
-            return jsonObject;
-        } catch (JSONException e) {
-            Log.e(TAG, "JSONException encountered while trying to serialize location");
-            e.printStackTrace();
-            return new JSONObject();
-        }
+            @Override
+            public void onRightMotorUpdate(int value) {
+                Log.i(TAG, "Received new motor right value: " + value);
+                statusMotorRight.setText("" + value);
+                barMotorRight.setProgress(value);
+            }
+        });
     }
-
 }
