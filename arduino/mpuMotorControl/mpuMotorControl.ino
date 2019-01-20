@@ -278,7 +278,7 @@ void loop()
     Serial.print('"');
 
     // Gyroscope
-    Serial.print("gy");
+    Serial.print("gx");
     Serial.print('"');
     Serial.print(":");
     Serial.print('"');
