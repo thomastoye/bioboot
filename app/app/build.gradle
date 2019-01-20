@@ -27,6 +27,7 @@ dependencies {
     implementation 'com.android.volley:volley:1.1.1'
     implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.1'
     implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
+    implementation 'com.github.Pygmalion69:Gauge:1.5'
 
 
     testImplementation 'junit:junit:4.12'

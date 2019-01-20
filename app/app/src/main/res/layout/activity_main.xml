@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:gauge="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
@@ -8,9 +9,9 @@
     tools:context=".MainActivity">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
         android:id="@+id/columns"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -21,28 +22,18 @@
 
             <!--Left column-->
 
-            <TextView
-                android:id="@+id/motor_left"
-                android:layout_width="match_parent"
+
+            <de.nitri.gauge.Gauge
+                android:id="@+id/motor_left_gauge"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Motor links" />
-
-            <TextView
-                android:id="@+id/status_motor_left"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-
-            <ProgressBar
-                android:id="@+id/bar_motor_left"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:indeterminate="false"
-                android:max="255"
-                android:min="-255" />
-
-
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                gauge:initialValue="0"
+                gauge:maxValue="255"
+                gauge:minValue="-255"
+                gauge:totalNicks="120"
+                gauge:valuePerNick="5" />
 
         </LinearLayout>
 
@@ -54,26 +45,17 @@
 
             <!--Right column-->
 
-            <TextView
-                android:id="@+id/motor_right"
-                android:layout_width="match_parent"
+            <de.nitri.gauge.Gauge
+                android:id="@+id/motor_right_gauge"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Motor rechts" />
-
-            <TextView
-                android:id="@+id/status_motor_right"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-
-            <ProgressBar
-                android:id="@+id/bar_motor_right"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:indeterminate="false"
-                android:max="255"
-                android:min="-255" />
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                gauge:initialValue="0"
+                gauge:maxValue="255"
+                gauge:minValue="-255"
+                gauge:totalNicks="120"
+                gauge:valuePerNick="5" />
 
         </LinearLayout>
 

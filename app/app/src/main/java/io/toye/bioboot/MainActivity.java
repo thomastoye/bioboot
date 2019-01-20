@@ -38,6 +38,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import de.nitri.gauge.Gauge;
+
 public class MainActivity extends AppCompatActivity {
     private TextView mTextMessage;
 
@@ -48,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
     private ProgressBar barMotorLeft;
     private ProgressBar barMotorRight;
+
+    private Gauge gaugeMotorRight;
+    private Gauge gaugeMotorLeft;
 
     Mqtt mqtt;
 
@@ -91,11 +96,8 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        statusMotorLeft = findViewById(R.id.status_motor_left);
-        statusMotorRight = findViewById(R.id.status_motor_right);
-
-        barMotorLeft = findViewById(R.id.bar_motor_left);
-        barMotorRight = findViewById(R.id.bar_motor_right);
+        gaugeMotorRight = findViewById(R.id.motor_right_gauge);
+        gaugeMotorLeft = findViewById(R.id.motor_left_gauge);
 
         Log.i(TAG, "Main activity start");
 
@@ -162,15 +164,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLeftMotorUpdate(int value) {
                 Log.i(TAG, "Received new motor left value: " + value);
-                statusMotorLeft.setText("" + value);
-                barMotorLeft.setProgress(value);
+
+                //gaugeMotorLeft.moveToValue(value); // Nice, but not fast enough
+                gaugeMotorLeft.setValue(value);
+                gaugeMotorLeft.setLowerText(""+value);
             }
 
             @Override
             public void onRightMotorUpdate(int value) {
                 Log.i(TAG, "Received new motor right value: " + value);
-                statusMotorRight.setText("" + value);
-                barMotorRight.setProgress(value);
+
+                //gaugeMotorRight.moveToValue(value); // Nice, but not fast enough
+                gaugeMotorRight.setValue(value);
+                gaugeMotorRight.setLowerText(""+value);
             }
         });
     }
