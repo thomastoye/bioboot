@@ -21,8 +21,8 @@ class Arduino:
         self.queget = collections.deque(maxlen=1)
         self.quesend = collections.deque(maxlen=1)
         self.quephone = collections.deque(maxlen=1)
-        _thread.start_new_thread(self.updatedata, (self.queget,self.quesend, serial.Serial('COM32', 9600,timeout=5)))
-
+        _thread.start_new_thread(self.updatedata, (self.queget,self.quesend, serial.Serial('COM40', 9600,timeout=1
+                                                                                           )))
 
     def getquephone(self):
         return self.quephone
@@ -38,11 +38,13 @@ class Arduino:
 
                 if qsend:
                     mm = qsend.popleft()
-                    print(mm)
-                    print("dgtfh")
+
+
                     self.quephone.append(mm)
                     ser.write(str.encode(mm))
-                sleep(0.1)
+                    print(mm)
+                    print("dgtfh")
+                sleep(0.01)
 
         finally:
             # Stop streaming
@@ -53,8 +55,9 @@ class Arduino:
         try:
             v = self.queget.popleft()
             self.queget.append(v)
+
             d = json.loads(str(v,'ascii'))
-            dir = math.atan2(d['my'],d['mx'])
+            dir = math.atan2(int( d['my']),int(d['mx']))
             dir = dir*180/math.pi
             if dir < 0:
                 dir = dir + 360

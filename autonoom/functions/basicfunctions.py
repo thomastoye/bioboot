@@ -40,11 +40,11 @@ def detectShoresFrom3DImage(img):
 
 
 def determinedirection(lidardata, realsensedata,generaldirection):
-    lidardata[lidardata < 1500] = 5500        #everything under 1500 is on boat self
-
-    if lidardata < 3000:            #almost colision imediate action needed
-        return generaldirection,0
-
+    # lidardata[lidardata < 1500] = 5500        #everything under 1500 is on boat self
+    #
+    # if lidardata < 3000:            #almost colision imediate action needed
+    #     return generaldirection,0
+    generaldirection= int(generaldirection)
     if generaldirection < -25 | generaldirection > 25:   # turn no navigation possible
         return  generaldirection,0
 
@@ -52,7 +52,7 @@ def determinedirection(lidardata, realsensedata,generaldirection):
 
     dirp = np.argmax(realsensedata)             #max value is best choice
     dirp = dirp -500
-    dirp = dirp* 33.28                          # convert to degrees
+    dirp = dirp/ 500                          # convert to degrees
     return dirp,255
 
 
