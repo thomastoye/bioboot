@@ -32,7 +32,7 @@ const publishUnderPrefix = (topic, message) => mqttPublish$.next({
 });
 
 // Debug
-controllerError$.subscribe(err => logger.log('error', 'Error with Dualshock controller', err));
+controllerError$.subscribe(err => logger.log('error', 'Error with Dualshock controller: ' + err, err));
 mqttPublish$.subscribe(data => logger.log('silly', `publishing to topic ${data.topic}: ${JSON.stringify(data.message)}`))
 
 // Publish controller erors
