@@ -1,7 +1,8 @@
 const SerialPort = require('serialport');
 const Readline = require('@serialport/parser-readline');
 const { Observable, Subject, ReplaySubject, from, of, combineLatest } = require('rxjs');
-const { map, filter, startWith } = require('rxjs/operators');
+const { map, filter, startWith, auditTime, debounceTime } = require('rxjs/operators');
+const leftPad = require('left-pad')
 const winston = require('winston');
 
 const name = 'arduino-comm';
@@ -23,11 +24,15 @@ const logger = winston.createLogger({
 
 const mqtt = require('async-mqtt').connect('mqtt://' + brokerAddress, { will: { payload: '0', topic: `${mqttPrefix}status/${name}` } });
 
-const port = new SerialPort(path, { baudRate })
+const port = new SerialPort(path, { baudRate }, (e) => {
+  if (e) {
+    logger.log('error', 'Could not connect to serial port: ' + e, e);
+    process.exit(1);
+  }
+});
 
 const parser = new Readline()
 port.pipe(parser)
-
 
 const serialIn$ = new Subject(); // messages received over serial published on this Subject
 const serialOut$ = new Subject(); // messages published on this Subject get sent over serial. Include a newline ('\n')
@@ -38,7 +43,7 @@ const motorLeftToSet$ = new Subject(); // value that should be set from MQTT
 const motorValuesToSet$ = combineLatest(
   motorRightToSet$.pipe(startWith(0)),
   motorLeftToSet$.pipe(startWith(0)),
-).pipe(map( ([ right, left ]) => ({ right, left }) ));
+).pipe(auditTime(250), map( ([ right, left ]) => ({ right, left }) ));
 
 // Debug
 mqttPublish$.subscribe(n => logger.log('silly', 'To be sent over MQTT: ' + JSON.stringify(n)));
@@ -52,13 +57,22 @@ serialOut$.subscribe(message => mqttPublish$.next( { topic: `${mqttPrefix}status
 
 // Receive data from serial hook
 parser.on('data', line => serialIn$.next(line));
+parser.on('error', e => logger.log('Error with serial port (or parser): ' + e, e));
 
 // Put data on serial port
 serialOut$.subscribe(data => port.write(data));
 
 // Put received motor values on serial out
 motorValuesToSet$.subscribe(motorValues => {
-  serialOut$.next(JSON.stringify({ left:  motorValues.left.toString(), right: motorValues.right.toString() }));
+  // See Arduino source code for format - basically 'r-255', 'l 255', 'l  10', 'r   0', ...
+  const formatMotorValue = (value) => {
+    const firstChar = value < 0 ? '-' : ' ';
+
+    return firstChar + leftPad(Math.abs(value).toString(), 3, ' ') + '\n';
+  };
+
+  serialOut$.next('l' + formatMotorValue(motorValues.left));
+  serialOut$.next('r' + formatMotorValue(motorValues.right));
 });
 
 // Publish data from serial in to MQTT topics

@@ -5,8 +5,11 @@
 
 //Motordriver declarations
 String motorSetting;
-BTS7960 mL(2,3,4,5,1);
-BTS7960 mR(6,7,8,9,1);
+BTS7960 mL(2, 3, 4, 5, 1);
+BTS7960 mR(6, 7, 8, 9, 1);
+
+#define   LEFT_MOTOR    1
+#define   RIGHT_MOTOR   2
 
 
 //MPU declartions
@@ -110,104 +113,75 @@ void callback()
 
 void serialEvent()
 {
-  int count = 0;
-  bool stringComplete = false;
-
-  motorSetting = "";
+  // Format:
+  // "r 255\n" - Set right motor to 255
+  // "l   0\n" - Set left motor to 0
+  // "l-255\n" - Set left motor to -255
+  // Length of input should always be 6 characters
+  //  Character 0: 'r' or 'l' -- right or left motor
+  //  Character 1: '-' or ' ' -- whether to negate. Ignore if not '-' (no negation)
+  //  Character 2: left-most digit or ' ' if no left-most digit
+  //  Character 3: middle digit or ' ' if no left-most digit
+  //  Character 4: right-most digit
+  //  Character 5: '\n'
   
-  
-  if (Serial.available() >= 24)
-  {
-    char inChar;
-    do
-    {
-      // get the new byte:
+  if (Serial.available() >= 6) {
+    motorSetting = "";
 
-      if (Serial.available())
-      {
-        inChar = (char)Serial.read();
-        // add it to the inputString:
-        if (inChar == '{')
-        {
-          motorSetting = inChar;
-          count = 0;
+
+    while (Serial.available() > 0) {
+      int inChar = Serial.read();
+      motorSetting += (char)inChar;
+
+      if (inChar == '\n') {
+        int whatMotor = 0;
+        int whatSpeed = 0;
+        String toParse = "";
+        toParse.reserve(3);
+
+        // Parse the incoming string
+        if (motorSetting[0] == 'r') {
+          whatMotor = RIGHT_MOTOR;
+        } else if (motorSetting[0] == 'l') {
+          whatMotor = LEFT_MOTOR;
+        } else {
+          Serial.println("{\"error\":\"Input didn't start with r or l\"}");
+          Serial.println(motorSetting[0]);
         }
-        else
-        {
-          motorSetting += inChar;
+
+        if (isDigit(motorSetting[2])) {
+          toParse += motorSetting[2]; // left-most digit
         }
 
-      }
-      else
-      {
-        inChar = 0;
-      }
-      count++;
-
-      if ((count >= 24) && (inChar == '}'))
-      {
-        stringComplete = true;
-      }
-    } while ((count < 24) || ((inChar != '}') && (count >= 24)));
-
-    count = 0;
-
-    while ((count < 80) && (inChar != '}'))
-    {
-      if (Serial.available())
-      {
-        inChar = (char)Serial.read();
-      }
-      count++;
-    }
-    
-    if ((stringComplete) && (motorSetting.charAt(0) == '{'))
-    {
-      int index = 0;
-      for (int i=0; i < 2; i++)
-      {
-        //extract direction
-        index = motorSetting.indexOf('"', index);
-        int index2 = motorSetting.indexOf('"', index+1);
-        String d = (motorSetting.substring(index+1,index2));
-        d.toLowerCase();
-
-        //extract value
-        int index3 = motorSetting.indexOf('"',index2+1);
-        int index4 = motorSetting.indexOf('"',index3+1);
-        char val[index4-index3];
-        (motorSetting.substring(index3+1,index4)).toCharArray(val, sizeof(val));
-        int v = atoi(val);
-
-        if (v > 255)
-        {
-          v = 255;
+        if (isDigit(motorSetting[3])) {
+          toParse += motorSetting[3]; // middle digit
         }
-        else if (v < -255)
-        {
-          v = -255;
+
+        toParse += motorSetting[4]; // right-most digit
+
+        whatSpeed = toParse.toInt();
+
+        if (motorSetting[1] == '-') {
+          whatSpeed *= -1;
         }
-        //Serial.println(v);
-        //assign depending on direction
-        switch(d.charAt(0)) 
-        {
-          case 'l':
-            Serial.print("{\"left\":");
-            Serial.print(val);
-            Serial.println("}");
-            mL.setSpeed(v);
-            break;
-          case 'r':
-            Serial.print("{\"right\":");
-            Serial.print(val);
-            Serial.println("}");
-            mR.setSpeed(v);
-            break;
-          default:
-            // statements
-            break;
+
+        if (whatMotor == LEFT_MOTOR) {
+          Serial.print("{\"left\":");
+          Serial.print(whatSpeed, DEC);
+          Serial.println("}");
+          
+          mL.setSpeed(whatSpeed);
         }
-        index = index4 + 1;
+
+        if (whatMotor == RIGHT_MOTOR) {
+          Serial.print("{\"right\":");
+          Serial.print(whatSpeed, DEC);
+          Serial.println("}");
+          
+          mR.setSpeed(whatSpeed);
+        }
+
+        break;
       }
     }
   }
