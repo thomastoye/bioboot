@@ -1,0 +1,3 @@
+[submodule "mqtt-backbone/ps-controller/node-dualshock-controller"]
+	path = mqtt-backbone/ps-controller/node-dualshock-controller
+	url = git@github.com:Kylir/node-dualshock-controller.git
