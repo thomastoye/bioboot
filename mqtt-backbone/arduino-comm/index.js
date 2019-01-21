@@ -43,7 +43,7 @@ const motorLeftToSet$ = new Subject(); // value that should be set from MQTT
 const motorValuesToSet$ = combineLatest(
   motorRightToSet$.pipe(startWith(0)),
   motorLeftToSet$.pipe(startWith(0)),
-).pipe(auditTime(250), map( ([ right, left ]) => ({ right, left }) ));
+).pipe(auditTime(100), map( ([ right, left ]) => ({ right, left }) ));
 
 // Debug
 mqttPublish$.subscribe(n => logger.log('silly', 'To be sent over MQTT: ' + JSON.stringify(n)));
