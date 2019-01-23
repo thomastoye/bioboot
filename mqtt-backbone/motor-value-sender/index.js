@@ -84,11 +84,15 @@ combineLatest(
     speed$.pipe(startWith(0)),
     joystickX$.pipe(startWith(128)),
 ).pipe(map(([ speed, x ]) => ( {x, speed }))).subscribe( data => {
-  logger.log('debug', 'delta joy ' + (data.x - 128));
-  const deltaJoystick = data.x - 128;
+  const deltaJoystick = data.x - 128; // 128 is the midpoint of the joystick
 
-  mqttPublish$.next({ topic: `${mqttPrefix}actuators/motor/left`, message: calcMotorSpeed(data.speed, -1 * deltaJoystick).toString() });
-  mqttPublish$.next({ topic: `${mqttPrefix}actuators/motor/right`, message: calcMotorSpeed(data.speed, deltaJoystick).toString() });
+  const leftMotorSped = Math.round(calcMotorSpeed(data.speed, deltaJoystick)).toString();
+  const rightMotorSpeed = Math.round(calcMotorSpeed(data.speed, -1 * deltaJoystick)).toString();
+
+  logger.log('debug', `Speed is ${data.speed}, joystick position is ${data.x} (Δ${deltaJoystick}). Result: left motor ${leftMotorSped}, right motor ${rightMotorSpeed}`);
+
+  mqttPublish$.next({ topic: `${mqttPrefix}actuators/motor/left`, message: leftMotorSped });
+  mqttPublish$.next({ topic: `${mqttPrefix}actuators/motor/right`, message: rightMotorSpeed });
 });
 
 // Publish MQTT messages when MQTT connection ready
