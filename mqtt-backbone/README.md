@@ -38,16 +38,35 @@ The following buttons are sent:
 
 #### `/sensors/acceleration`
 
-This topic captures the values of an accelerometer.
+This topic captures the values of an accelerometer. The values are published under `sensors/acceleration/{x,y,z}`.
+
+Example:
+
+* `boat/1/sensors/acceleration/x`: `-18`
+* `boat/1/sensors/acceleration/y`: `-242`
+* `boat/1/sensors/acceleration/z`: `-518`
 
 #### `/sensors/gyroscope`
 
+This topic captures the values of a gyroscope. The values are published under `sensors/gyroscope/{x,y,z}`.
+
+Example:
+
+* `boat/1/sensors/gyroscope/x`: `0`
+* `boat/1/sensors/gyroscope/y`: `18`
+* `boat/1/sensors/gyroscope/z`: `17`
 
 #### `/sensors/magnetometer`
 
+This topic captures the values of a magenetometer. The values are published under `sensors/magnetometer/{x,y,z}`.
+
+* `boat/1/sensors/magnetometer/x`: `-18`
+* `boat/1/sensors/magnetometer/y`: `-242`
+* `boat/1/sensors/magnetometer/z`: `-518`
 
 #### `/sensors/lidar`
 
+This topic is currently not implemented. The auto-pilot does not use Lidar values at this time.
 
 ### Actuators
 
