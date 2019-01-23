@@ -24,6 +24,16 @@ def set_current_data(new_data):
     print(new_data)
     data = new_data
 
+def send_to_motor(client, value, side): # side == 'left' || side == 'right'
+    topic = ''
+
+    if side == 'left':
+        topic = 'boat/1/sensors/autopilot/motor/left'
+    else:
+        topic = 'boat/1/sensors/autopilot/motor/right'
+
+    client.publish(topic, value)
+
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -88,10 +98,12 @@ client.on_message = on_message
 
 client.connect("localhost", 1883, 60)
 
-# Blocking call that processes network traffic, dispatches callbacks and
-# handles reconnecting.
-# Other loop*() functions are available that give a threaded interface and a
-# manual interface.
-client.loop_forever()
+send_to_motor(client, 255, 'right')
+send_to_motor(client, -255, 'left')
 
+client.loop_start() # start MQTT client in bg thread - stop with client.loop_stop()
+
+while True:
+    # Just to keep python from exiting for now. Delete once autopilot is implemented I guess
+    pass
 
