@@ -28,8 +28,8 @@ const joystickY$ = new Subject();
 
 const r1$ = new Subject(); // true if pressed, false if not
 const l1$ = new Subject(); // true if pressed, false if not
-const r2$ = new Subject(); // true if pressed, false if not
-const l2$ = new Subject(); // true if pressed, false if not
+const dpadUp$ = new Subject(); // true if pressed, false if not
+const dpadDown$ = new Subject(); // true if pressed, false if not
 const cross$ = new Subject(); // true if pressed, false if not
 
 // Used to cap value, e.g. cap speed e [ -255, 255 ]: capValue(speed, -255, 255)
@@ -61,9 +61,9 @@ combineLatest(
 // Reset speed on 'X' button press
 cross$.pipe(pressed => pressed).subscribe(() => speed$.next(0));
 // Set speed to max reverse on L2 press
-l2$.pipe(pressed => pressed).subscribe(() => speed$.next(-255));
+dpadDown$.pipe(pressed => pressed).subscribe(() => speed$.next(-255));
 // Set speed to max on R2 press
-r2$.pipe(pressed => pressed).subscribe(() => speed$.next(255));
+dpadUp$.pipe(pressed => pressed).subscribe(() => speed$.next(255));
 
 // Calculate motor values based on joystick x and speed
 
@@ -123,8 +123,8 @@ mqtt.subscribe([
   `${mqttPrefix}sensors/controller/joystick/left/y`,
   `${mqttPrefix}sensors/controller/r1/pressed`,
   `${mqttPrefix}sensors/controller/l1/pressed`,
-  `${mqttPrefix}sensors/controller/r2/pressed`,
-  `${mqttPrefix}sensors/controller/l2/pressed`,
+  `${mqttPrefix}sensors/controller/dpadUp/pressed`,
+  `${mqttPrefix}sensors/controller/dpadDown/pressed`,
   `${mqttPrefix}sensors/controller/x/pressed`,
 ], (err, granted) => {
   if (err) {
@@ -152,12 +152,12 @@ mqtt.on('message', (topic, message) => {
       l1$.next(message.toString() === '1');
       break;
 
-    case `${mqttPrefix}sensors/controller/r2/pressed`:
-      r2$.next(message.toString() === '1');
+    case `${mqttPrefix}sensors/controller/dpadUp/pressed`:
+      dpadUp$.next(message.toString() === '1');
       break;
 
-    case `${mqttPrefix}sensors/controller/l2/pressed`:
-      l2$.next(message.toString() === '1');
+    case `${mqttPrefix}sensors/controller/dpadDown/pressed`:
+      dpadDown$.next(message.toString() === '1');
       break;
 
     case `${mqttPrefix}sensors/controller/x/pressed`:
